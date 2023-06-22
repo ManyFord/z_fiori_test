@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Fiori</title>
+</head>
+
+<body>
+    <video id="videoElement" autoplay></video>
+    <script>
+        Tesseract.create({
+          workerPath: 'https://cdn.jsdelivr.net/gh/naptha/tesseract.js/dist/worker.min.js',
+          langPath: 'https://cdn.jsdelivr.net/gh/naptha/tessdata@master/eng.traineddata',
+          corePath: 'https://cdn.jsdelivr.net/gh/naptha/tesseract.js-core/0.2.0/index.js',
+        });
+      </script>
+      
+    <script src='https://cdn.jsdelivr.net/gh/naptha/tesseract.js@1.0.10/dist/tesseract.js'></script>
+    <script>
+        // Acessar a câmera e exibir o vídeo no elemento <video>
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function (stream) {
+                var videoElement = document.getElementById('videoElement');
+                videoElement.srcObject = stream;
+            })
+            .catch(function (error) {
+                console.error('Erro ao acessar a câmera:', error);
+            });
+            
+        function realizarLeitura() {
+            var videoElement = document.getElementById('videoElement');
+            var canvas = document.createElement('canvas');
+            var context = canvas.getContext('2d');
+            
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+        
+            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+        
+            
+            canvas.toBlob(function(blob) {
+                var imageUrl = URL.createObjectURL(blob);
+                console.log(blob)
+                
+                Tesseract.recognize(imageUrl, 'por')
+                    .then(function(result) {
+
+                        console.log('Texto do canhoto:', result);
+                        var numerosEncontrados = result.text.match(/\d+/g);
+                        var numerosApenas = numerosEncontrados ? numerosEncontrados.join('') : '';
+                        alert(numerosApenas)
+                        console.log(numerosApenas)
+                    })
+                    .catch(function(error) {
+                        console.error('Erro ao realizar OCR:', error);
+                    });
+            }, 'image/jpeg');
+        }
+
+        realizarLeitura();
+    </script>
+    <button id="readButton" onclick="realizarLeitura()">Realizar leitura do canhoto</button>
+</body>
+
+</html>
